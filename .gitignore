@@ -129,3 +129,14 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# Ignore all markdown files except root README
+*.md
+**/*.md
+!README.md
+
+# Ignore generated/temp assets
+*.png
+BackEnd/verify-hqtcsdl.cjs
+stitch_prompt.md
+STITCH_SPEC.md
