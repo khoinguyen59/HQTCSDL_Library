@@ -1,27 +1,27 @@
-# He thong quan ly thu vien - Do an HQTCSDL
+# Hệ thống Quản lý Thư viện - Đồ án HQTCSDL
 
-Du an trien khai he thong quan ly thu vien truong hoc tren Oracle Database, ho tro nhieu nguoi dung, giao tac an toan, stored procedure, trigger, xu ly dong thoi va bao cao thong ke.
+Đồ án triển khai hệ thống quản lý thư viện trường học trên Oracle Database, hỗ trợ nhiều người dùng, giao tác an toàn, Stored Procedure, Trigger, xử lý đồng thời và báo cáo thống kê.
 
-## 1. Muc tieu
+## 1. Mục tiêu
 
-- Quan ly tai khoan va phan quyen.
-- Quan ly doc gia, nhan vien, danh muc, sach, lo sach va kho sach.
-- Lap phieu muon, them sach vao phieu, nhan tra sach.
-- Ghi nhan vi pham va tien phat.
-- Nhap sach tu nha cung cap va thanh ly sach.
-- Bao cao muon-tra, ton kho va tien phat.
-- Trinh bay cac van de dong thoi: Lost Update, Uncommitted Read, Non-repeatable Read, Phantom Read, Deadlock.
+- Quản lý tài khoản và phân quyền.
+- Quản lý độc giả, nhân viên, danh mục, sách, lô sách và kho sách.
+- Lập phiếu mượn, thêm sách vào phiếu, nhận trả sách.
+- Ghi nhận vi phạm và tiền phạt.
+- Nhập sách từ nhà cung cấp và thanh lý sách.
+- Báo cáo mượn-trả, tồn kho và tiền phạt.
+- Trình bày các vấn đề đồng thời: Lost Update, Uncommitted Read, Non-repeatable Read, Phantom Read, Deadlock.
 
-## 2. Cong nghe
+## 2. Công nghệ
 
-| Thanh phan | Cong nghe |
+| Thành phần | Công nghệ |
 |---|---|
 | Frontend | React, Vite, Material UI |
 | Backend | Node.js, Express |
 | Database | Oracle Database 21c XE |
 | Oracle driver | `oracledb` (thin mode) |
 
-## 3. Cau truc du an
+## 3. Cấu trúc dự án
 
 ```text
 library_oracle_hqtcsdl/
@@ -29,26 +29,26 @@ library_oracle_hqtcsdl/
 │   ├── controllers/hqtcsdlController.js   # API logic + Oracle error mapping
 │   ├── Database/database.js               # Oracle connection pool
 │   ├── routes/route.js                    # Express routes
-│   └── .env                               # DB credentials (not committed)
+│   └── .env                               # DB credentials (không commit)
 ├── Database/
-│   ├── 01_HQTCSDL_Schema.sql             # Tables, constraints, sequences
+│   ├── 01_HQTCSDL_Schema.sql             # Bảng, ràng buộc, sequence
 │   ├── 02_HQTCSDL_Procedures_Triggers.sql # SP, Functions, Triggers
-│   ├── 03_HQTCSDL_Demo_Data.sql          # Sample data
-│   ├── 04_HQTCSDL_Concurrency_Demo.sql   # Concurrency test scenarios
-│   ├── 05_HQTCSDL_Report_Queries.sql     # Report queries
-│   └── 06_HQTCSDL_Quick_Verify.sql       # Quick verification
+│   ├── 03_HQTCSDL_Demo_Data.sql          # Dữ liệu mẫu
+│   ├── 04_HQTCSDL_Concurrency_Demo.sql   # Kịch bản đồng thời
+│   ├── 05_HQTCSDL_Report_Queries.sql     # Truy vấn báo cáo
+│   └── 06_HQTCSDL_Quick_Verify.sql       # Kiểm tra nhanh
 ├── FrontEnd/
 │   └── src/pages/HQTCSDL/
-│       ├── Actions.jsx                    # Transaction forms (MUI)
-│       └── Dashboard.jsx                  # Statistics dashboard
+│       ├── Actions.jsx                    # Form giao dịch (MUI)
+│       └── Dashboard.jsx                  # Bảng thống kê
 └── README.md
 ```
 
 ## 4. Database Oracle
 
-### Khoi tao
+### Khởi tạo
 
-Chay theo thu tu trong SQL*Plus hoac SQL Developer voi user `LIBRARY_ADMIN`:
+Chạy theo thứ tự trong SQL*Plus hoặc SQL Developer với user `LIBRARY_ADMIN`:
 
 ```sql
 @Database/01_HQTCSDL_Schema.sql
@@ -57,7 +57,7 @@ Chay theo thu tu trong SQL*Plus hoac SQL Developer voi user `LIBRARY_ADMIN`:
 @Database/06_HQTCSDL_Quick_Verify.sql
 ```
 
-### Cac bang chinh
+### Các bảng chính
 
 - `TAIKHOAN`, `DOCGIA`, `NHANVIEN`, `DOANHMUC`, `SACH`, `LOSACH`, `KHOSACH`
 - `PHIEUMUON`, `CT_PHIEUMUON`, `PHIEUTRA`, `VIPHAM`
@@ -65,62 +65,62 @@ Chay theo thu tu trong SQL*Plus hoac SQL Developer voi user `LIBRARY_ADMIN`:
 
 ### Stored Procedures
 
-| Procedure | Chuc nang |
+| Procedure | Chức năng |
 |---|---|
-| `SP_DANGKY_DOCGIA` | Dang ky doc gia moi |
-| `SP_TAO_PHIEU_MUON` | Tao phieu muon (tra ve ma phieu) |
-| `SP_THEM_CT_PHIEUMUON` | Them sach vao phieu muon |
-| `SP_TRA_SACH` | Nhan tra sach, tinh phat |
-| `SP_NHAP_SACH` | Nhap sach tu nha cung cap |
-| `SP_THANHLY_SACH` | Thanh ly sach khoi kho |
+| `SP_DANGKY_DOCGIA` | Đăng ký độc giả mới |
+| `SP_TAO_PHIEU_MUON` | Tạo phiếu mượn (trả về mã phiếu) |
+| `SP_THEM_CT_PHIEUMUON` | Thêm sách vào phiếu mượn |
+| `SP_TRA_SACH` | Nhận trả sách, tính phạt |
+| `SP_NHAP_SACH` | Nhập sách từ nhà cung cấp |
+| `SP_THANHLY_SACH` | Thanh lý sách khỏi kho |
 
 ### Functions
 
-| Function | Chuc nang |
+| Function | Chức năng |
 |---|---|
-| `FN_SO_SACH_DANG_MUON` | Dem so sach dang muon |
-| `FN_SO_LUONG_CON_LAI` | Kiem tra ton kho |
-| `FN_KIEM_TRA_THE_HOP_LE` | Xac nhan the doc gia con han |
-| `FN_TINH_TIEN_PHAT` | Tinh tien phat qua han |
+| `FN_SO_SACH_DANG_MUON` | Đếm số sách đang mượn |
+| `FN_SO_LUONG_CON_LAI` | Kiểm tra tồn kho |
+| `FN_KIEM_TRA_THE_HOP_LE` | Xác nhận thẻ độc giả còn hạn |
+| `FN_TINH_TIEN_PHAT` | Tính tiền phạt quá hạn |
 
 ## 5. Backend API
 
 Base URL: `http://localhost:3000/db-api/hqtcsdl`
 
-| Method | Endpoint | Chuc nang |
+| Method | Endpoint | Chức năng |
 |---|---|---|
-| GET | `/dashboard` | So lieu tong quan (sach, doc gia, phieu muon, phat) |
-| GET | `/books` | Danh sach sach va ton kho |
-| GET | `/readers` | Danh sach doc gia |
-| POST | `/readers` | Dang ky doc gia moi |
-| GET | `/loans` | Danh sach phieu muon |
-| POST | `/loans` | Tao phieu muon (tra ve `loanId`) |
-| POST | `/loan-items` | Them sach vao phieu muon |
-| POST | `/return` | Nhan tra sach |
-| POST | `/import-book` | Nhap sach vao kho |
-| POST | `/liquidate-book` | Thanh ly sach |
+| GET | `/dashboard` | Số liệu tổng quan (sách, độc giả, phiếu mượn, phạt) |
+| GET | `/books` | Danh sách sách và tồn kho |
+| GET | `/readers` | Danh sách độc giả |
+| POST | `/readers` | Đăng ký độc giả mới |
+| GET | `/loans` | Danh sách phiếu mượn |
+| POST | `/loans` | Tạo phiếu mượn (trả về `loanId`) |
+| POST | `/loan-items` | Thêm sách vào phiếu mượn |
+| POST | `/return` | Nhận trả sách |
+| POST | `/import-book` | Nhập sách vào kho |
+| POST | `/liquidate-book` | Thanh lý sách |
 
-### Xu ly loi
+### Xử lý lỗi
 
-Backend tu dong dich ma loi Oracle thanh thong bao de hieu:
+Backend tự động dịch mã lỗi Oracle thành thông báo dễ hiểu:
 
-| Ma Oracle | Thong bao |
+| Mã Oracle | Thông báo |
 |---|---|
-| `ORA-00001` | Du lieu bi trung lap |
-| `ORA-02291` | Ma tham chieu khong ton tai |
-| `ORA-02292` | Du lieu dang duoc su dung |
-| `ORA-20xxx` | Thong bao tu procedure/trigger |
-| Thieu field | Liet ke cac truong can nhap |
+| `ORA-00001` | Dữ liệu bị trùng lặp |
+| `ORA-02291` | Mã tham chiếu không tồn tại |
+| `ORA-02292` | Dữ liệu đang được sử dụng |
+| `ORA-20xxx` | Thông báo từ Procedure/Trigger |
+| Thiếu field | Liệt kê các trường cần nhập |
 
-## 6. Huong dan chay
+## 6. Hướng dẫn chạy
 
-### 1. Khoi dong Oracle
+### 1. Khởi động Oracle
 
-Dam bao 2 service dang chay:
+Đảm bảo 2 service đang chạy:
 - `OracleServiceXE`
 - `OracleOraDB21Home1TNSListener`
 
-### 2. Khoi dong Backend
+### 2. Khởi động Backend
 
 ```bash
 cd BackEnd
@@ -128,7 +128,7 @@ npm install
 npm start
 ```
 
-File `.env` can co:
+File `.env` cần có:
 
 ```env
 DATABASE_USER=LIBRARY_ADMIN
@@ -137,7 +137,7 @@ DATABASE_CONNECTION_STRING=localhost:1521/XEPDB1
 PORT=3000
 ```
 
-### 3. Khoi dong Frontend
+### 3. Khởi động Frontend
 
 ```bash
 cd FrontEnd
@@ -145,38 +145,38 @@ npm install
 npm run dev
 ```
 
-Truy cap: `http://127.0.0.1:5173`
+Truy cập: `http://127.0.0.1:5173`
 
-### 4. Kiem tra nhanh
+### 4. Kiểm tra nhanh
 
 ```bash
-# Backend syntax check
+# Kiểm tra cú pháp Backend
 cd BackEnd && npm run check
 
-# Frontend build check
+# Build Frontend
 cd FrontEnd && npm run build
 
-# API test
+# Test API
 curl http://localhost:3000/db-api/hqtcsdl/dashboard
 ```
 
-## 7. Giao dien chinh
+## 7. Giao diện chính
 
-Trang **Giao dich thu vien** (`/hqtcsdl/actions`) gom 6 tab:
+Trang **Giao dịch thư viện** (`/hqtcsdl/actions`) gồm 6 tab:
 
-1. **Cap the doc gia** - Dang ky doc gia moi
-2. **Nhap sach** - Nhap sach tu nha cung cap
-3. **Lap phieu muon** - Tao phieu muon cho doc gia
-4. **Them sach vao phieu** - Them sach vao phieu muon da tao
-5. **Nhan tra sach** - Thu hoi sach va tinh phat
-6. **Thanh ly sach** - Ghi nhan sach loai khoi luu thong
+1. **Cấp thẻ độc giả** — Đăng ký độc giả mới
+2. **Nhập sách** — Nhập sách từ nhà cung cấp
+3. **Lập phiếu mượn** — Tạo phiếu mượn cho độc giả
+4. **Thêm sách vào phiếu** — Thêm sách vào phiếu mượn đã tạo
+5. **Nhận trả sách** — Thu hồi sách và tính phạt
+6. **Thanh lý sách** — Ghi nhận sách loại khỏi lưu thông
 
-Trang **Dashboard** (`/hqtcsdl/dashboard`) hien thi thong ke tong quan.
+Trang **Dashboard** (`/hqtcsdl/dashboard`) hiển thị thống kê tổng quan.
 
-## 8. Trang thai
+## 8. Trạng thái
 
 - Oracle: `LIBRARY_ADMIN/admin@localhost:1521/XEPDB1`
 - Backend: syntax check PASS
 - Frontend: production build PASS
-- API GET/POST: da kiem tra thanh cong
-- Error handling: Oracle errors duoc dich sang thong bao ro rang
+- API GET/POST: đã kiểm tra thành công
+- Error handling: lỗi Oracle được dịch sang thông báo rõ ràng
