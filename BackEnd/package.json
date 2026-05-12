@@ -6,7 +6,10 @@
   "type": "module",
   "scripts": {
     "start": "nodemon index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon index.js",
+    "start:node": "node index.js",
+    "check": "node --check index.js && node --check controllers/hqtcsdlController.js && node --check routes/route.js && node --check webserver/webserver.js"
   },
   "author": "Jakaria",
   "license": "MIT",

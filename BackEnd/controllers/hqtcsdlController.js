@@ -1,15 +1,47 @@
-﻿import OracleDB from 'oracledb';
+import OracleDB from 'oracledb';
 import { queryExecute } from '../Database/database.js';
 
 function ok(res, data = {}) {
   res.status(200).json(data);
 }
 
-function fail(next, err) {
-  next(err);
+function translateOracleError(err) {
+  const raw = err?.message || 'Loi he thong khong xac dinh.';
+  if (raw.includes('ORA-00001')) {
+    return 'Du lieu bi trung lap hoac da ton tai trong he thong. Vui long kiem tra lai ma.';
+  }
+  if (raw.includes('ORA-02291')) {
+    return 'Du lieu tham chieu khong ton tai. Vui long kiem tra lai ma doc gia, nhan vien, sach hoac nha cung cap.';
+  }
+  if (raw.includes('ORA-02292')) {
+    return 'Khong the thao tac vi du lieu dang duoc su dung o noi khac.';
+  }
+  if (/ORA-20\d{3}/.test(raw)) {
+    const match = raw.match(/ORA-20\d{3}:\s*([^\r\n]+)/);
+    return match?.[1] || raw;
+  }
+  return raw;
 }
 
-export async function getDashboard(req, res, next) {
+function fail(res, err) {
+  console.error(err);
+  res.status(500).json({ message: translateOracleError(err) });
+}
+
+function required(body, fields) {
+  return fields.filter((field) => body[field] === undefined || body[field] === null || body[field] === '');
+}
+
+function badRequest(res, fields) {
+  res.status(400).json({ message: `Vui long nhap day du cac thong tin: ${fields.join(', ')}` });
+}
+
+function toNumber(value) {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : NaN;
+}
+
+export async function getDashboard(req, res) {
   try {
     const queries = {
       totalBooks: 'SELECT COUNT(*) AS VALUE FROM SACH',
@@ -27,11 +59,11 @@ export async function getDashboard(req, res, next) {
 
     ok(res, result);
   } catch (err) {
-    fail(next, err);
+    fail(res, err);
   }
 }
 
-export async function listBooks(req, res, next) {
+export async function listBooks(req, res) {
   try {
     const result = await queryExecute(`
       SELECT S.MaSach, S.ISBN, S.TenSach, S.TacGia, S.NhaXuatBan, S.NamXuatBan,
@@ -44,11 +76,11 @@ export async function listBooks(req, res, next) {
     `, {});
     ok(res, { rows: result.rows });
   } catch (err) {
-    fail(next, err);
+    fail(res, err);
   }
 }
 
-export async function listReaders(req, res, next) {
+export async function listReaders(req, res) {
   try {
     const result = await queryExecute(`
       SELECT MaDocGia, HoTen, Email, SoDienThoai, DiaChi, NgayDangKy, NgayHetHan, TrangThai
@@ -57,11 +89,11 @@ export async function listReaders(req, res, next) {
     `, {});
     ok(res, { rows: result.rows });
   } catch (err) {
-    fail(next, err);
+    fail(res, err);
   }
 }
 
-export async function listLoans(req, res, next) {
+export async function listLoans(req, res) {
   try {
     const result = await queryExecute(`
       SELECT PM.MaPhieuMuon, DG.HoTen AS TenDocGia, NV.HoTen AS TenNhanVien,
@@ -77,13 +109,20 @@ export async function listLoans(req, res, next) {
     `, {});
     ok(res, { rows: result.rows });
   } catch (err) {
-    fail(next, err);
+    fail(res, err);
   }
 }
 
-export async function createReader(req, res, next) {
+export async function createReader(req, res) {
   try {
-    const binds = {
+    const missing = required(req.body, ['username', 'password', 'fullName']);
+    if (missing.length) return badRequest(res, missing);
+
+    await queryExecute(`
+      BEGIN
+        SP_DANGKY_DOCGIA(:username, :password, :fullName, :email, :phone, :address, :expiredAt);
+      END;
+    `, {
       username: req.body.username,
       password: req.body.password,
       fullName: req.body.fullName,
@@ -91,108 +130,102 @@ export async function createReader(req, res, next) {
       phone: req.body.phone,
       address: req.body.address,
       expiredAt: req.body.expiredAt ? new Date(req.body.expiredAt) : null
-    };
-    await queryExecute(`
-      BEGIN
-        SP_DANGKY_DOCGIA(:username, :password, :fullName, :email, :phone, :address, :expiredAt);
-      END;
-    `, binds);
+    });
     ok(res, { message: 'Dang ky doc gia thanh cong' });
   } catch (err) {
-    fail(next, err);
+    fail(res, err);
   }
 }
 
-export async function createLoan(req, res, next) {
+export async function createLoan(req, res) {
   try {
-    const binds = {
-      readerId: req.body.readerId,
-      employeeId: req.body.employeeId,
-      dueDate: new Date(req.body.dueDate),
-      loanId: { dir: OracleDB.BIND_OUT, type: OracleDB.STRING, maxSize: 20 }
-    };
+    const missing = required(req.body, ['readerId', 'employeeId', 'dueDate']);
+    if (missing.length) return badRequest(res, missing);
+
     const result = await queryExecute(`
       BEGIN
         SP_TAO_PHIEU_MUON(:readerId, :employeeId, :dueDate, :loanId);
       END;
-    `, binds);
+    `, {
+      readerId: req.body.readerId,
+      employeeId: req.body.employeeId,
+      dueDate: new Date(req.body.dueDate),
+      loanId: { dir: OracleDB.BIND_OUT, type: OracleDB.STRING, maxSize: 20 }
+    });
     ok(res, { message: 'Tao phieu muon thanh cong', loanId: result.outBinds.loanId });
   } catch (err) {
-    fail(next, err);
+    fail(res, err);
   }
 }
 
-export async function addLoanItem(req, res, next) {
+export async function addLoanItem(req, res) {
   try {
-    const binds = {
-      loanId: req.body.loanId,
-      bookId: req.body.bookId,
-      quantity: Number(req.body.quantity || 1)
-    };
+    const missing = required(req.body, ['loanId', 'bookId']);
+    if (missing.length) return badRequest(res, missing);
+    const quantity = toNumber(req.body.quantity || 1);
+    if (!Number.isFinite(quantity) || quantity <= 0) return badRequest(res, ['quantity']);
+
     await queryExecute(`
       BEGIN
         SP_THEM_CT_PHIEUMUON(:loanId, :bookId, :quantity);
       END;
-    `, binds);
+    `, { loanId: req.body.loanId, bookId: req.body.bookId, quantity });
     ok(res, { message: 'Them sach vao phieu muon thanh cong' });
   } catch (err) {
-    fail(next, err);
+    fail(res, err);
   }
 }
 
-export async function returnLoan(req, res, next) {
+export async function returnLoan(req, res) {
   try {
-    const binds = {
-      loanId: req.body.loanId,
-      employeeId: req.body.employeeId
-    };
+    const missing = required(req.body, ['loanId', 'employeeId']);
+    if (missing.length) return badRequest(res, missing);
+
     await queryExecute(`
       BEGIN
         SP_TRA_SACH(:loanId, :employeeId);
       END;
-    `, binds);
+    `, { loanId: req.body.loanId, employeeId: req.body.employeeId });
     ok(res, { message: 'Tra sach thanh cong' });
   } catch (err) {
-    fail(next, err);
+    fail(res, err);
   }
 }
 
-export async function importBook(req, res, next) {
+export async function importBook(req, res) {
   try {
-    const binds = {
-      supplierId: req.body.supplierId,
-      employeeId: req.body.employeeId,
-      bookId: req.body.bookId,
-      quantity: Number(req.body.quantity),
-      price: Number(req.body.price)
-    };
+    const missing = required(req.body, ['supplierId', 'employeeId', 'bookId', 'quantity', 'price']);
+    if (missing.length) return badRequest(res, missing);
+    const quantity = toNumber(req.body.quantity);
+    const price = toNumber(req.body.price);
+    if (!Number.isFinite(quantity) || quantity <= 0) return badRequest(res, ['quantity']);
+    if (!Number.isFinite(price) || price < 0) return badRequest(res, ['price']);
+
     await queryExecute(`
       BEGIN
         SP_NHAP_SACH(:supplierId, :employeeId, :bookId, :quantity, :price);
       END;
-    `, binds);
+    `, { supplierId: req.body.supplierId, employeeId: req.body.employeeId, bookId: req.body.bookId, quantity, price });
     ok(res, { message: 'Nhap sach thanh cong' });
   } catch (err) {
-    fail(next, err);
+    fail(res, err);
   }
 }
 
-
-export async function liquidateBook(req, res, next) {
+export async function liquidateBook(req, res) {
   try {
-    const binds = {
-      bookId: req.body.bookId,
-      employeeId: req.body.employeeId,
-      quantity: Number(req.body.quantity),
-      reason: req.body.reason
-    };
+    const missing = required(req.body, ['bookId', 'employeeId', 'quantity']);
+    if (missing.length) return badRequest(res, missing);
+    const quantity = toNumber(req.body.quantity);
+    if (!Number.isFinite(quantity) || quantity <= 0) return badRequest(res, ['quantity']);
+
     await queryExecute(`
       BEGIN
         SP_THANHLY_SACH(:bookId, :employeeId, :quantity, :reason);
       END;
-    `, binds);
+    `, { bookId: req.body.bookId, employeeId: req.body.employeeId, quantity, reason: req.body.reason });
     ok(res, { message: 'Thanh ly sach thanh cong' });
   } catch (err) {
-    fail(next, err);
+    fail(res, err);
   }
 }

@@ -1,117 +1,70 @@
-﻿# Hệ thống quản lý thư viện - Đồ án HQTCSDL
+﻿# He thong quan ly thu vien - Do an HQTCSDL
 
-Dự án này là bản triển khai riêng cho đồ án môn Hệ quản trị cơ sở dữ liệu. Ứng dụng được phát triển từ khung `Jakaria44`, nhưng đã được định hướng lại để bám sát `ĐỒ_ÁN_HQTCSDL.txt`, `Yêu cầu.txt` và `Yeu_cau_Do_an_mon_hoc.txt`.
+Du an trien khai he thong quan ly thu vien truong hoc tren Oracle, ho tro nhieu nguoi dung, giao tac an toan, stored procedure, trigger, xu ly dong thoi va bao cao thong ke.
 
-Do not edit the original report files directly. Add implementation notes and supplement content in this README or in project-side documents instead.
+Khong sua truc tiep file bao cao goc `ĐỒ_ÁN_HQTCSDL.txt`. Moi phan bo sung duoc ghi trong README hoac cac tai lieu phu cua du an.
 
-## 1. Mục tiêu
+## 1. Muc tieu
 
-Xây dựng hệ thống quản lý thư viện trường học trên Oracle, hỗ trợ nhiều người dùng cùng lúc và minh họa rõ các nội dung cốt lõi của môn học:
+- Quan ly tai khoan va phan quyen.
+- Quan ly doc gia, nhan vien, danh muc, sach, lo sach va kho sach.
+- Lap phieu muon, them sach vao phieu, nhan tra sach.
+- Ghi nhan vi pham va tien phat.
+- Nhap sach tu nha cung cap va thanh ly sach.
+- Bao cao muon-tra, ton kho va tien phat.
+- Trinh bay cac van de dong thoi: Lost Update, Uncommitted Read, Non-repeatable Read, Phantom Read, Deadlock.
 
-- Mô hình dữ liệu quan hệ.
-- Ràng buộc toàn vẹn.
-- Stored procedure.
-- Trigger.
-- Giao tác.
-- Khóa và mức cô lập.
-- Xử lý đồng thời.
-- Report/thống kê.
-
-## 2. Phạm vi nghiệp vụ
-
-Hệ thống tập trung vào các nghiệp vụ chính:
-
-- Quản lý tài khoản và phân quyền.
-- Quản lý độc giả.
-- Quản lý nhân viên/thủ thư.
-- Quản lý danh mục sách.
-- Quản lý sách, lô sách và kho sách.
-- Lập phiếu mượn.
-- Thêm chi tiết phiếu mượn.
-- Trả sách.
-- Ghi nhận vi phạm và tiền phạt.
-- Nhập sách từ nhà cung cấp.
-- Báo cáo mượn-trả, tồn kho và tiền phạt.
-- Mô phỏng các vấn đề đồng thời.
-
-Các chức năng phụ từ repo gốc như review, favourite, news/message, job/application không còn là trọng tâm.
-
-## 3. Công nghệ
+## 2. Cong nghe
 
 - Frontend: React, Vite, Material UI.
 - Backend: Node.js, Express.
-- Database: Oracle.
+- Database: Oracle XE.
 - Oracle driver: `oracledb`.
+- Desktop staff console: Edge app mode mo rieng phan he thu thu/quan ly.
 
-## 4. Cấu trúc thư mục
+## 3. Cau truc chinh
 
 ```text
 library_oracle_hqtcsdl/
 ├── BackEnd/
-│   ├── controllers/
-│   │   └── hqtcsdlController.js
-│   ├── Database/
-│   │   ├── database.js
-│   │   └── queryFunctions.js
-│   └── routes/
-│       └── route.js
+│   ├── controllers/hqtcsdlController.js
+│   ├── Database/database.js
+│   └── routes/route.js
 ├── Database/
 │   ├── 01_HQTCSDL_Schema.sql
 │   ├── 02_HQTCSDL_Procedures_Triggers.sql
 │   ├── 03_HQTCSDL_Demo_Data.sql
 │   ├── 04_HQTCSDL_Concurrency_Demo.sql
+│   ├── 05_HQTCSDL_Report_Queries.sql
+│   ├── 06_HQTCSDL_Quick_Verify.sql
+│   ├── CHUONG3_MA_PL_SQL_BO_SUNG.md
 │   ├── Concurrency_Scenarios.md
-│   ├── HQTCSDL_Transactions.sql
+│   ├── _legacy/
 │   └── README_HQTCSDL.md
 ├── FrontEnd/
-│   └── src/pages/Home/Home.jsx
-├── DOI_CHIEU_YEU_CAU.md
-├── HUONG_TRIEN_KHAI.md
-├── TINH_NANG_GIU_LAI_VA_LOAI_BO.md
+├── RUN_DEMO.md
+├── BAO_CAO_HOAN_THIEN_DU_AN.md
 └── README.md
 ```
 
-## 5. Database Oracle
+## 4. Database Oracle
 
-### 5.1. Thứ tự chạy script
-
-Chạy lần lượt trong Oracle SQL Developer hoặc SQL*Plus:
+Chay theo thu tu:
 
 ```sql
 @Database/01_HQTCSDL_Schema.sql
 @Database/02_HQTCSDL_Procedures_Triggers.sql
 @Database/03_HQTCSDL_Demo_Data.sql
+@Database/06_HQTCSDL_Quick_Verify.sql
 ```
 
-File `Database/04_HQTCSDL_Concurrency_Demo.sql` dùng để mô phỏng và trình bày trong báo cáo, không nhất thiết chạy toàn bộ một lần.
+Cac bang chinh:
 
-### 5.2. Các bảng chính
+- `TAIKHOAN`, `DOCGIA`, `NHANVIEN`, `DOANHMUC`, `SACH`, `LOSACH`, `KHOSACH`
+- `PHIEUMUON`, `CT_PHIEUMUON`, `PHIEUTRA`, `VIPHAM`
+- `NHACUNGCAP`, `PHIEUNHAP`, `CT_PHIEUNHAP`, `PHIEUTRANCC`, `THANHLY`
 
-- `TAIKHOAN`
-- `DOCGIA`
-- `NHANVIEN`
-- `DOANHMUC`
-- `SACH`
-- `LOSACH`
-- `KHOSACH`
-- `PHIEUMUON`
-- `CT_PHIEUMUON`
-- `PHIEUTRA`
-- `VIPHAM`
-- `NHACUNGCAP`
-- `PHIEUNHAP`
-- `CT_PHIEUNHAP`
-- `PHIEUTRANCC`
-- `THANHLY`
-
-### 5.3. Function chính
-
-- `FN_SO_SACH_DANG_MUON`
-- `FN_SO_LUONG_CON_LAI`
-- `FN_KIEM_TRA_THE_HOP_LE`
-- `FN_TINH_TIEN_PHAT`
-
-### 5.4. Procedure chính
+Procedure chinh:
 
 - `SP_DANGKY_DOCGIA`
 - `SP_TAO_PHIEU_MUON`
@@ -120,39 +73,37 @@ File `Database/04_HQTCSDL_Concurrency_Demo.sql` dùng để mô phỏng và trì
 - `SP_NHAP_SACH`
 - `SP_THANHLY_SACH`
 
-### 5.5. Trigger chính
+Function chinh:
 
-- Trigger sinh mã tự động cho các bảng nghiệp vụ.
-- Trigger hỗ trợ cập nhật trạng thái quá hạn.
+- `FN_SO_SACH_DANG_MUON`
+- `FN_SO_LUONG_CON_LAI`
+- `FN_KIEM_TRA_THE_HOP_LE`
+- `FN_TINH_TIEN_PHAT`
 
-## 6. Backend API mới cho schema HQTCSDL
+## 5. Backend API
 
-Các API mới được thêm dưới prefix `/db-api/hqtcsdl`.
+Base URL:
 
-| Method | Endpoint | Mục đích |
-|---|---|---|
-| GET | `/db-api/hqtcsdl/dashboard` | Lấy số liệu tổng quan |
-| GET | `/db-api/hqtcsdl/books` | Danh sách sách và tồn kho |
-| GET | `/db-api/hqtcsdl/readers` | Danh sách độc giả |
-| POST | `/db-api/hqtcsdl/readers` | Đăng ký độc giả |
-| GET | `/db-api/hqtcsdl/loans` | Danh sách phiếu mượn |
-| POST | `/db-api/hqtcsdl/loans` | Tạo phiếu mượn |
-| POST | `/db-api/hqtcsdl/loan-items` | Thêm sách vào phiếu mượn |
-| POST | `/db-api/hqtcsdl/return` | Trả sách |
-| POST | `/db-api/hqtcsdl/import-book` | Nhập thêm sách vào kho |
-
-## 7. Cấu hình backend
-
-Tạo file `BackEnd/.env`:
-
-```env
-DATABASE_USER=your_oracle_user
-DATABASE_PASSWORD=your_oracle_password
-DATABASE_CONNECTION_STRING=localhost:1521/XEPDB1
-port=3000
+```text
+http://localhost:3000/db-api/hqtcsdl
 ```
 
-Cài đặt và chạy backend:
+| Method | Endpoint | Muc dich |
+|---|---|---|
+| GET | `/dashboard` | Lay so lieu tong quan |
+| GET | `/books` | Danh sach sach va ton kho |
+| GET | `/readers` | Danh sach doc gia |
+| POST | `/readers` | Dang ky doc gia |
+| GET | `/loans` | Danh sach phieu muon |
+| POST | `/loans` | Tao phieu muon |
+| POST | `/loan-items` | Them sach vao phieu muon |
+| POST | `/return` | Tra sach |
+| POST | `/import-book` | Nhap sach vao kho |
+| POST | `/liquidate-book` | Thanh ly sach khoi kho |
+
+## 6. Chay he thong
+
+### Backend
 
 ```bash
 cd BackEnd
@@ -160,7 +111,16 @@ npm install
 npm start
 ```
 
-## 8. Chạy frontend
+File `BackEnd/.env`:
+
+```env
+DATABASE_USER=LIBRARY_ADMIN
+DATABASE_PASSWORD=admin
+DATABASE_CONNECTION_STRING=localhost:1521/XEPDB1
+PORT=3000
+```
+
+### Web OPAC / Reader UI
 
 ```bash
 cd FrontEnd
@@ -168,71 +128,60 @@ npm install
 npm run dev
 ```
 
-Frontend mặc định gọi backend tại:
+Mo:
 
 ```text
-http://localhost:3000/db-api/
+http://127.0.0.1:5173/index.html
 ```
 
-## 9. Xử lý đồng thời
+### Desktop staff console
 
-Tài liệu và script liên quan:
+Khi Vite dang chay:
 
-- `Database/Concurrency_Scenarios.md`
-- `Database/04_HQTCSDL_Concurrency_Demo.sql`
-- `Database/05_HQTCSDL_Report_Queries.sql`
+```bash
+cd FrontEnd
+npm run desktop:open
+```
 
-Các tình huống đã chuẩn bị:
+Phan he thu thu/quan ly se mo trong cua so ung dung rieng tai `/hqtcsdl/actions`.
 
-- Lost Update.
-- Uncommitted Read.
-- Non-repeatable Read.
-- Phantom Read.
-- Deadlock.
+## 7. Kiem tra
 
-Giải pháp chính:
+Backend:
 
-- Dùng `SELECT ... FOR UPDATE` cho dòng tồn kho hoặc phiếu mượn cần khóa.
-- Đưa kiểm tra điều kiện và cập nhật vào cùng procedure.
-- Giữ transaction ngắn.
-- Thống nhất thứ tự khóa.
-- Backend hỗ trợ bắt lỗi và retry khi cần.
+```bash
+cd BackEnd
+npm run check
+```
 
-## 10. Ghi chú triển khai
+Frontend:
 
-Dự án hiện đã có đủ khung để tiếp tục hoàn thiện thành bản demo cuối cùng:
+```bash
+cd FrontEnd
+npm run check
+```
 
-- Database đã được chuẩn hóa theo đề tài thư viện.
-- Procedure/trigger/function đã được viết cho nghiệp vụ trọng tâm.
-- Dữ liệu mẫu đã có.
-- Backend đã có API mới cho schema chuẩn hóa.
-- Frontend home page đã được viết lại để phản ánh đúng đồ án.
+API tong quan:
 
-Khi triển khai thật, cần đảm bảo Oracle đã chạy, file `.env` đúng thông tin kết nối và các script database đã được chạy theo đúng thứ tự.
+```text
+http://localhost:3000/db-api/hqtcsdl/dashboard
+```
 
-## 11. Demo and acceptance documents
+## 8. Tai lieu lien quan
 
-- `HUONG_DAN_DEMO.md`: step-by-step demo script for the presentation.
-- `CHECKLIST_HOAN_THIEN.md`: checklist of completed deliverables.
-- `BackEnd/API_HQTCSDL.md`: documentation for the new backend endpoints.
-- `Database/CHUONG3_MA_PL_SQL_BO_SUNG.md`: PL/SQL snippets for filling the empty `Ma PL/SQL` sections in Chapter 3 without editing the original report file.
-## 12. Latest Project Updates
+- `RUN_DEMO.md`: huong dan chay nhanh.
+- `BAO_CAO_HOAN_THIEN_DU_AN.md`: bao cao hoan thien va ket qua kiem chung.
+- `HUONG_DAN_DEMO.md`: kich ban trinh bay va van hanh.
+- `DOI_CHIEU_YEU_CAU.md`: doi chieu yeu cau voi trien khai.
+- `BackEnd/API_HQTCSDL.md`: tai lieu API.
+- `Database/README_HQTCSDL.md`: huong dan database.
+- `Database/Concurrency_Scenarios.md`: mo ta cac kich ban dong thoi.
 
-Recent additions are recorded here instead of editing the original report file:
+## 9. Trang thai hien tai
 
-- Added `SP_THANHLY_SACH` in `Database/02_HQTCSDL_Procedures_Triggers.sql` to lock inventory rows, validate available quantity, and write liquidation records to `THANHLY`.
-- Added backend API `POST /db-api/hqtcsdl/liquidate-book` and the book liquidation form in `/hqtcsdl/actions`.
-- Updated `Database/Concurrency_Scenarios.md` to use the current schema (`KHOSACH`, `PHIEUMUON`, `CT_PHIEUMUON`, `PHIEUTRA`, `VIPHAM`) instead of inherited tables from the old repo.
-- Added `Database/CHUONG3_MA_PL_SQL_BO_SUNG.md` with PL/SQL snippets for Chapter 3, so the original report source remains untouched.
-- Updated `HUONG_DAN_DEMO.md`, `CHECKLIST_HOAN_THIEN.md`, `DOI_CHIEU_YEU_CAU.md`, and `BackEnd/API_HQTCSDL.md` so they match the liquidation workflow and concurrency documentation.
-
-## 13. Frontend screens for the project
-
-New screens were added to demo the HQTCSDL schema and API directly:
-
-- `/hqtcsdl`: dashboard using `/db-api/hqtcsdl/dashboard`, `/books`, `/readers`, and `/loans`.
-- `/hqtcsdl/actions`: demo forms for reader registration, loan creation, loan item insertion, book return, book import, and book liquidation.
-- `/stat`: redirected to the HQTCSDL dashboard for reporting/demo purposes.
-
-These screens demonstrate the core library workflows without depending on the older inherited pages.
-
+- Oracle da duoc cau hinh voi user `LIBRARY_ADMIN/admin@localhost:1521/XEPDB1`.
+- Database scripts da chay va verify thanh cong.
+- Backend API da test voi Oracle.
+- Frontend build thanh cong.
+- Desktop staff console mo duoc bang Edge app mode.
+- File bao cao goc khong bi sua truc tiep.

@@ -4,10 +4,14 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host 127.0.0.1",
     "build": "vite build",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "desktop": "concurrently -k \"npm run dev\" \"wait-on http://127.0.0.1:5173/index.html && start msedge --app=http://127.0.0.1:5173/hqtcsdl/actions\"",
+    "desktop:open": "start msedge --app=http://127.0.0.1:5173/hqtcsdl/actions",
+    "desktop:chrome": "concurrently -k \"npm run dev\" \"wait-on http://127.0.0.1:5173/index.html && start chrome --app=http://127.0.0.1:5173/hqtcsdl/actions\"",
+    "check": "npm run build"
   },
   "dependencies": {
     "@emotion/react": "^11.11.1",
@@ -45,6 +49,7 @@
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
     "@vitejs/plugin-react": "^4.0.3",
+    "concurrently": "^9.2.1",
     "eslint": "^8.47.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-prettier": "^9.0.0",
@@ -55,6 +60,7 @@
     "eslint-plugin-react-refresh": "^0.4.3",
     "prettier": "^3.0.2",
     "sass": "^1.65.1",
-    "vite": "^4.4.5"
+    "vite": "^4.4.5",
+    "wait-on": "^9.0.10"
   }
 }

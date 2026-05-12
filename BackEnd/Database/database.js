@@ -1,42 +1,35 @@
-import OracleDB from 'oracledb';
+﻿import OracleDB from 'oracledb';
 import { config } from './databaseConfiguration.js';
 
 export async function start() {
-    const pool = await OracleDB.createPool(config);
+  await OracleDB.createPool(config);
 }
 
-export async function stop(){
-    await OracleDB.getPool().close(0);
+export async function stop() {
+  await OracleDB.getPool().close(0);
 }
 
-export function queryExecute(statement, binds = [], opts = {}) {
-  return new Promise(async (resolve, reject) => {
-    let conn;
-    let result = [];
-  
-    opts.outFormat = OracleDB.OUT_FORMAT_OBJECT;
-    opts.autoCommit = opts.autoCommit ?? true;
-    // opts.resultSet = true;
-  
-    try {
-      conn = await OracleDB.getConnection();
-      result = await conn.execute(statement, binds, opts);
-      resolve (result);
-    } catch (err) {
-      console.error(err);
-      reject(err);
-    } finally {
+export async function queryExecute(statement, binds = [], opts = {}) {
+  let conn;
+  const executeOptions = {
+    ...opts,
+    outFormat: OracleDB.OUT_FORMAT_OBJECT,
+    autoCommit: opts.autoCommit ?? true
+  };
 
-        if (conn) {
-            try {
-            await conn.close();
-            } catch (err) {
-            console.error(err);
-            }
-        }
+  try {
+    conn = await OracleDB.getConnection();
+    return await conn.execute(statement, binds, executeOptions);
+  } catch (err) {
+    console.error(err);
+    throw err;
+  } finally {
+    if (conn) {
+      try {
+        await conn.close();
+      } catch (err) {
+        console.error(err);
+      }
     }
-  });
+  }
 }
-  
-
-  

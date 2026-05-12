@@ -1,4 +1,4 @@
-import { start, stop } from './Database/database.js';
+﻿import { start, stop } from './Database/database.js';
 import { config } from './Database/databaseConfiguration.js';
 import { close, initialize } from './webserver/webserver.js';
 
@@ -48,7 +48,7 @@ async function shutdown(e) {
     console.log('Closing database module');
 
     await stop();
-  } catch (err) {
+  } catch (e) {
     console.log('Encountered error', e);
 
     err = err || e;
@@ -83,3 +83,4 @@ process.on('uncaughtException', (err) => {
 
   shutdown(err).then((r) => console.log('Shutdown complete'));
 });
+
