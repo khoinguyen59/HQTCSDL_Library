@@ -135,6 +135,7 @@ dist
 **/*.md
 !README.md
 !kich_ban_kiem_thu_do_an.md
+!HUONG_DAN_CAI_DAT.md
 
 # Ignore generated/temp assets
 *.png
