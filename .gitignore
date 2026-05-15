@@ -142,3 +142,4 @@ dist
 BackEnd/verify-hqtcsdl.cjs
 stitch_prompt.md
 STITCH_SPEC.md
+puppeteer_tests/ 
