@@ -44,6 +44,21 @@ library_oracle_hqtcsdl/
 └── README.md
 ```
 
+## 4. Kịch bản Kiểm thử & Xử lý đồng thời
+
+Dự án bao gồm kịch bản kiểm thử toàn diện kết hợp giữa giao diện Web và **Oracle SQL Developer**.
+
+**Quy trình chuẩn cho mỗi test case:**
+1. Chạy query trên **SQL Developer** để xem dữ liệu TRƯỚC khi giao dịch.
+2. Thao tác chức năng trên giao diện **Web** (Ví dụ: Thêm phiếu mượn).
+3. Chạy lại query trên **SQL Developer** để kiểm chứng dữ liệu SAU giao dịch (Ví dụ: Số lượng tồn kho tự động giảm).
+
+**Các kịch bản đồng thời (Concurrency) đã xử lý:**
+- **Lost Update:** Sử dụng `SELECT ... FOR UPDATE` (Thủ thư 2 phải chờ Thủ thư 1 nhả khóa).
+- **Uncommitted Read (Dirty Read):** Oracle mặc định mức cô lập `READ COMMITTED`, chặn đọc dữ liệu chưa commit.
+- **Phantom Read:** Khắc phục bằng cách thiết lập `SET TRANSACTION ISOLATION LEVEL SERIALIZABLE`.
+- **Deadlock:** Oracle tự phát hiện khóa chéo (`ORA-00060`) và tự động rollback 1 giao dịch.
+
 ## 4. Database Oracle
 
 ### Khởi tạo
@@ -102,15 +117,15 @@ Base URL: `http://localhost:3000/db-api/hqtcsdl`
 
 ### Xử lý lỗi
 
-Backend tự động dịch mã lỗi Oracle thành thông báo dễ hiểu:
+Backend tự động dịch mã lỗi Oracle thành thông báo tiếng Việt có dấu rõ ràng:
 
 | Mã Oracle | Thông báo |
 |---|---|
-| `ORA-00001` | Dữ liệu bị trùng lặp |
-| `ORA-02291` | Mã tham chiếu không tồn tại |
-| `ORA-02292` | Dữ liệu đang được sử dụng |
+| `ORA-00001` | Dữ liệu bị trùng lặp hoặc đã tồn tại trong hệ thống. |
+| `ORA-02291` | Dữ liệu tham chiếu không tồn tại. |
+| `ORA-02292` | Không thể thao tác vì dữ liệu đang được sử dụng ở nơi khác. |
 | `ORA-20xxx` | Thông báo từ Procedure/Trigger |
-| Thiếu field | Liệt kê các trường cần nhập |
+| Thiếu field | Vui lòng nhập đầy đủ các thông tin: ... |
 
 ## 6. Hướng dẫn chạy
 

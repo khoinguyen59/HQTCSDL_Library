@@ -1,4 +1,4 @@
-﻿import { Box, Chip, Drawer, Typography, useMediaQuery } from '@mui/material';
+import { Box, Chip, Drawer, Typography, useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import DatabaseIcon from '@mui/icons-material/StorageRounded';
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
@@ -8,10 +8,19 @@ import PerfectScrollbar from 'react-perfect-scrollbar';
 import { Stack } from '@mui/system';
 import MenuList from './MenuList/MenuList';
 import { drawerWidth } from '../../store/constants';
+import { useAuth } from '../../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const Sidebar = ({ drawerOpen, drawerToggle, window }) => {
     const theme = useTheme();
     const matchUpMd = useMediaQuery(theme.breakpoints.up('md'));
+    const { user, logout } = useAuth();
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+        logout();
+        navigate('/login');
+    };
 
     const brand = (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, px: 1, pt: 1, mb: 3 }}>
@@ -41,11 +50,14 @@ const Sidebar = ({ drawerOpen, drawerToggle, window }) => {
                 <Box sx={{ width: 32, height: 32, borderRadius: '50%', display: 'grid', placeItems: 'center', background: '#E1E2ED', color: '#434655' }}>
                     <PersonRoundedIcon fontSize="small" />
                 </Box>
-                <Typography sx={{ fontWeight: 700, color: '#191B23' }}>Thủ thư 01</Typography>
+                <Typography sx={{ fontWeight: 700, color: '#191B23', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {user ? user.fullName : 'Khách'}
+                </Typography>
             </Stack>
             <Chip
                 icon={<LogoutRoundedIcon />}
                 label="Đăng xuất"
+                onClick={handleLogout}
                 sx={{
                     justifyContent: 'flex-start',
                     width: '100%',

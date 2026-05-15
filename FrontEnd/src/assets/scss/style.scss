@@ -126,3 +126,17 @@
     transform: translateX(10px);
   }
 }
+
+// ==============================|| MUI + TAILWIND FIXES ||============================== //
+// Fix Tailwind Preflight breaking the notch in MUI OutlinedInput
+fieldset > legend {
+  width: auto !important;
+  display: block !important;
+  float: none !important;
+  visibility: visible !important;
+}
+
+// Fix Tailwind Preflight changing input box-sizing and line-height
+.MuiInputBase-input {
+  box-sizing: content-box !important;
+}

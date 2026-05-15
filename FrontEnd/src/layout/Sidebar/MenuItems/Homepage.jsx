@@ -1,4 +1,4 @@
-﻿import { Assessment, Home, PlayCircle } from '@mui/icons-material';
+import { Assessment, Home, PlayCircle } from '@mui/icons-material';
 
 const Homepage = {
   id: 'general',

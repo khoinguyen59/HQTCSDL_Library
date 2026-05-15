@@ -6,50 +6,52 @@ import KeyboardReturnRoundedIcon from '@mui/icons-material/KeyboardReturnRounded
 import InventoryRoundedIcon from '@mui/icons-material/InventoryRounded';
 import DeleteSweepRoundedIcon from '@mui/icons-material/DeleteSweepRounded';
 import AddTaskRoundedIcon from '@mui/icons-material/AddTaskRounded';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import dayjs from 'dayjs';
 import server from '../../HTTP/httpCommonParam';
 
 const forms = {
   reader: {
-    title: 'Cap the doc gia',
-    caption: 'Nhap thong tin chi tiet de tao the thu vien moi cho doc gia.',
+    title: 'Cấp thẻ độc giả',
+    caption: 'Nhập thông tin chi tiết để tạo thẻ thư viện mới cho độc giả.',
     endpoint: 'hqtcsdl/readers',
     icon: <PersonAddRoundedIcon />,
-    fields: [['username', 'Ten dang nhap', 'text', true], ['password', 'Mat khau', 'password', true], ['fullName', 'Ho ten', 'text', true], ['email', 'Email', 'email'], ['phone', 'So dien thoai', 'text'], ['address', 'Dia chi', 'text'], ['expiredAt', 'Ngay het han', 'date']],
+    fields: [['username', 'Tên đăng nhập', 'text', true], ['password', 'Mật khẩu', 'password', true], ['fullName', 'Họ tên', 'text', true], ['email', 'Email', 'email'], ['phone', 'Số điện thoại', 'text'], ['address', 'Địa chỉ', 'text'], ['expiredAt', 'Ngày hết hạn', 'date']],
   },
   importBook: {
-    title: 'Nhap sach',
-    caption: 'Ghi nhan phieu nhap va cong ton kho.',
+    title: 'Nhập sách',
+    caption: 'Ghi nhận phiếu nhập và cộng tồn kho.',
     endpoint: 'hqtcsdl/import-book',
     icon: <InventoryRoundedIcon />,
-    fields: [['supplierId', 'Ma nha cung cap', 'text', true], ['employeeId', 'Ma nhan vien', 'text', true], ['bookId', 'Ma sach', 'text', true], ['quantity', 'So luong', 'number', true], ['price', 'Don gia', 'number', true]],
+    fields: [['supplierId', 'Mã nhà cung cấp', 'text', true], ['employeeId', 'Mã nhân viên', 'text', true], ['bookId', 'Mã sách', 'text', true], ['quantity', 'Số lượng', 'number', true], ['price', 'Đơn giá', 'number', true]],
   },
   loan: {
-    title: 'Lap phieu muon',
-    caption: 'Ghi nhan phieu muon cho doc gia tai quay.',
+    title: 'Lập phiếu mượn',
+    caption: 'Ghi nhận phiếu mượn cho độc giả tại quầy.',
     endpoint: 'hqtcsdl/loans',
     icon: <MenuBookRoundedIcon />,
-    fields: [['readerId', 'Ma doc gia', 'text', true], ['employeeId', 'Ma nhan vien', 'text', true], ['dueDate', 'Ngay hen tra', 'date', true]],
+    fields: [['readerId', 'Mã độc giả', 'text', true], ['employeeId', 'Mã nhân viên', 'text', true], ['dueDate', 'Ngày hẹn trả', 'date', true]],
   },
   loanItem: {
-    title: 'Them sach vao phieu',
-    caption: 'Kiem tra ton kho va xuat muon sach.',
+    title: 'Thêm sách vào phiếu',
+    caption: 'Kiểm tra tồn kho và xuất mượn sách.',
     endpoint: 'hqtcsdl/loan-items',
     icon: <AddTaskRoundedIcon />,
-    fields: [['loanId', 'Ma phieu muon', 'text', true], ['bookId', 'Ma sach', 'text', true], ['quantity', 'So luong', 'number', true]],
+    fields: [['loanId', 'Mã phiếu mượn', 'text', true], ['bookId', 'Mã sách', 'text', true], ['quantity', 'Số lượng', 'number', true]],
   },
   returnBook: {
-    title: 'Nhan tra sach',
-    caption: 'Cap nhat phieu tra, hoan kho va tinh phat neu qua han.',
+    title: 'Nhận trả sách',
+    caption: 'Cập nhật phiếu trả, hoàn kho và tính phạt nếu quá hạn.',
     endpoint: 'hqtcsdl/return',
     icon: <KeyboardReturnRoundedIcon />,
-    fields: [['loanId', 'Ma phieu muon', 'text', true], ['employeeId', 'Ma nhan vien', 'text', true]],
+    fields: [['loanId', 'Mã phiếu mượn', 'text', true], ['employeeId', 'Mã nhân viên', 'text', true]],
   },
   liquidateBook: {
-    title: 'Thanh ly sach',
-    caption: 'Ghi nhan sach khong con luu thong va tru ton kho.',
+    title: 'Thanh lý sách',
+    caption: 'Ghi nhận sách không còn lưu thông và trừ tồn kho.',
     endpoint: 'hqtcsdl/liquidate-book',
     icon: <DeleteSweepRoundedIcon />,
-    fields: [['bookId', 'Ma sach', 'text', true], ['employeeId', 'Ma nhan vien', 'text', true], ['quantity', 'So luong', 'number', true], ['reason', 'Ly do thanh ly', 'text']],
+    fields: [['bookId', 'Mã sách', 'text', true], ['employeeId', 'Mã nhân viên', 'text', true], ['quantity', 'Số lượng', 'number', true], ['reason', 'Lý do thanh lý', 'text']],
   },
 };
 
@@ -76,12 +78,12 @@ export default function Actions() {
         if (formData[id] !== undefined && formData[id] !== '') params.append(id, formData[id]);
       });
       const response = await server.post(activeForm.endpoint, params);
-      let message = response.data.message || 'Thao tac thanh cong';
-      if (response.data.loanId) message += ` (Ma phieu: ${response.data.loanId})`;
+      let message = response.data.message || 'Thao tác thành công';
+      if (response.data.loanId) message += ` (Mã phiếu: ${response.data.loanId})`;
       setStatus({ type: 'success', message });
       setFormData({});
     } catch (error) {
-      setStatus({ type: 'error', message: error.response?.data?.message || 'Loi ket noi may chu.' });
+      setStatus({ type: 'error', message: error.response?.data?.message || 'Lỗi kết nối máy chủ.' });
     } finally {
       setSubmitting(false);
     }
@@ -90,8 +92,8 @@ export default function Actions() {
   return (
     <Stack spacing={3}>
       <Box>
-        <Typography component="h2" sx={{ fontSize: { xs: 28, md: 36 }, fontWeight: 800, color: '#191B23' }}>Giao dich thu vien</Typography>
-        <Typography sx={{ color: '#434655', mt: 0.5 }}>Quan ly muon tra, dang ky doc gia, nhap kho va thanh ly sach.</Typography>
+        <Typography component="h2" sx={{ fontSize: { xs: 28, md: 36 }, fontWeight: 800, color: '#191B23' }}>Giao dịch thư viện</Typography>
+        <Typography sx={{ color: '#434655', mt: 0.5 }}>Quản lý mượn trả, đăng ký độc giả, nhập kho và thanh lý sách.</Typography>
       </Box>
       <Grid container spacing={3}>
         <Grid item xs={12} lg={3}>
@@ -115,13 +117,29 @@ export default function Actions() {
               <Grid container spacing={2.5}>
                 {activeForm.fields.map(([id, label, type, isRequired]) => (
                   <Grid item xs={12} md={id === 'address' || id === 'reason' ? 12 : 6} key={id}>
-                    <TextField fullWidth required={Boolean(isRequired)} multiline={id === 'address' || id === 'reason'} minRows={id === 'address' || id === 'reason' ? 3 : 1} type={type} name={id} label={label} value={formData[id] || ''} onChange={handleChange} InputLabelProps={type === 'date' ? { shrink: true } : undefined} sx={{ '& .MuiOutlinedInput-root': { borderRadius: 1, background: '#FFFFFF' } }} />
+                    {type === 'date' ? (
+                      <DatePicker
+                        label={label}
+                        format="DD/MM/YYYY"
+                        value={formData[id] ? dayjs(formData[id]) : null}
+                        onChange={(newValue) => setFormData((prev) => ({ ...prev, [id]: newValue ? newValue.format('YYYY-MM-DD') : '' }))}
+                        slotProps={{
+                          textField: {
+                            fullWidth: true,
+                            required: Boolean(isRequired),
+                            sx: { '& .MuiOutlinedInput-root': { borderRadius: 1, background: '#FFFFFF' } }
+                          }
+                        }}
+                      />
+                    ) : (
+                      <TextField fullWidth required={Boolean(isRequired)} multiline={id === 'address' || id === 'reason'} minRows={id === 'address' || id === 'reason' ? 3 : 1} type={type} name={id} label={label} value={formData[id] || ''} onChange={handleChange} sx={{ '& .MuiOutlinedInput-root': { borderRadius: 1, background: '#FFFFFF' } }} />
+                    )}
                   </Grid>
                 ))}
               </Grid>
               <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="flex-end" spacing={2} sx={{ pt: 2, borderTop: '1px solid #C3C6D7' }}>
-                <Button type="button" variant="outlined" onClick={() => setFormData({})} sx={{ borderRadius: 1, borderColor: '#737686', color: '#191B23' }}>Xoa trong</Button>
-                <Button type="submit" disabled={submitting} variant="contained" sx={{ borderRadius: 1, background: '#2563EB', color: '#FFFFFF', '&:hover': { background: '#004AC6' } }}>{submitting ? 'Dang xu ly...' : 'Xac nhan'}</Button>
+                <Button type="button" variant="outlined" onClick={() => setFormData({})} sx={{ borderRadius: 1, borderColor: '#737686', color: '#191B23' }}>Xóa trống</Button>
+                <Button type="submit" disabled={submitting} variant="contained" sx={{ borderRadius: 1, background: '#2563EB', color: '#FFFFFF', '&:hover': { background: '#004AC6' } }}>{submitting ? 'Đang xử lý...' : 'Xác nhận'}</Button>
               </Stack>
             </Stack>
           </Card>

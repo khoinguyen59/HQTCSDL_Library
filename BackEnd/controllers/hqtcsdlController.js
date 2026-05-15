@@ -6,15 +6,15 @@ function ok(res, data = {}) {
 }
 
 function translateOracleError(err) {
-  const raw = err?.message || 'Loi he thong khong xac dinh.';
+  const raw = err?.message || 'Lỗi hệ thống không xác định.';
   if (raw.includes('ORA-00001')) {
-    return 'Du lieu bi trung lap hoac da ton tai trong he thong. Vui long kiem tra lai ma.';
+    return 'Dữ liệu bị trùng lặp hoặc đã tồn tại trong hệ thống. Vui lòng kiểm tra lại mã.';
   }
   if (raw.includes('ORA-02291')) {
-    return 'Du lieu tham chieu khong ton tai. Vui long kiem tra lai ma doc gia, nhan vien, sach hoac nha cung cap.';
+    return 'Dữ liệu tham chiếu không tồn tại. Vui lòng kiểm tra lại mã độc giả, nhân viên, sách hoặc nhà cung cấp.';
   }
   if (raw.includes('ORA-02292')) {
-    return 'Khong the thao tac vi du lieu dang duoc su dung o noi khac.';
+    return 'Không thể thao tác vì dữ liệu đang được sử dụng ở nơi khác.';
   }
   if (/ORA-20\d{3}/.test(raw)) {
     const match = raw.match(/ORA-20\d{3}:\s*([^\r\n]+)/);
@@ -33,7 +33,7 @@ function required(body, fields) {
 }
 
 function badRequest(res, fields) {
-  res.status(400).json({ message: `Vui long nhap day du cac thong tin: ${fields.join(', ')}` });
+  res.status(400).json({ message: `Vui lòng nhập đầy đủ các thông tin: ${fields.join(', ')}` });
 }
 
 function toNumber(value) {
@@ -131,7 +131,7 @@ export async function createReader(req, res) {
       address: req.body.address,
       expiredAt: req.body.expiredAt ? new Date(req.body.expiredAt) : null
     });
-    ok(res, { message: 'Dang ky doc gia thanh cong' });
+    ok(res, { message: 'Đăng ký độc giả thành công.' });
   } catch (err) {
     fail(res, err);
   }
@@ -152,7 +152,7 @@ export async function createLoan(req, res) {
       dueDate: new Date(req.body.dueDate),
       loanId: { dir: OracleDB.BIND_OUT, type: OracleDB.STRING, maxSize: 20 }
     });
-    ok(res, { message: 'Tao phieu muon thanh cong', loanId: result.outBinds.loanId });
+    ok(res, { message: 'Tạo phiếu mượn thành công.', loanId: result.outBinds.loanId });
   } catch (err) {
     fail(res, err);
   }
@@ -170,7 +170,7 @@ export async function addLoanItem(req, res) {
         SP_THEM_CT_PHIEUMUON(:loanId, :bookId, :quantity);
       END;
     `, { loanId: req.body.loanId, bookId: req.body.bookId, quantity });
-    ok(res, { message: 'Them sach vao phieu muon thanh cong' });
+    ok(res, { message: 'Thêm sách vào phiếu mượn thành công.' });
   } catch (err) {
     fail(res, err);
   }
@@ -186,7 +186,7 @@ export async function returnLoan(req, res) {
         SP_TRA_SACH(:loanId, :employeeId);
       END;
     `, { loanId: req.body.loanId, employeeId: req.body.employeeId });
-    ok(res, { message: 'Tra sach thanh cong' });
+    ok(res, { message: 'Trả sách thành công.' });
   } catch (err) {
     fail(res, err);
   }
@@ -206,7 +206,7 @@ export async function importBook(req, res) {
         SP_NHAP_SACH(:supplierId, :employeeId, :bookId, :quantity, :price);
       END;
     `, { supplierId: req.body.supplierId, employeeId: req.body.employeeId, bookId: req.body.bookId, quantity, price });
-    ok(res, { message: 'Nhap sach thanh cong' });
+    ok(res, { message: 'Nhập sách thành công.' });
   } catch (err) {
     fail(res, err);
   }
@@ -224,7 +224,7 @@ export async function liquidateBook(req, res) {
         SP_THANHLY_SACH(:bookId, :employeeId, :quantity, :reason);
       END;
     `, { bookId: req.body.bookId, employeeId: req.body.employeeId, quantity, reason: req.body.reason });
-    ok(res, { message: 'Thanh ly sach thanh cong' });
+    ok(res, { message: 'Thanh lý sách thành công.' });
   } catch (err) {
     fail(res, err);
   }

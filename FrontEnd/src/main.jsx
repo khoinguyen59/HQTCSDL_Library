@@ -1,4 +1,4 @@
-﻿import { CssBaseline } from "@mui/material";
+import { CssBaseline } from "@mui/material";
 import { StyledEngineProvider } from "@mui/system";
 import React from "react";
 import ReactDOM from "react-dom/client";
@@ -11,6 +11,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { ConfirmProvider } from "material-ui-confirm";
 import { MenuContextProvider } from "./contexts/MenuContextProvider.jsx";
 import { ThemeContextProvider } from "./contexts/ThemeContextProvider.jsx";
+import { AuthProvider } from "./contexts/AuthContext.jsx";
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -25,7 +26,9 @@ ReactDOM.createRoot(document.getElementById("root")).render(
             >
               <CssBaseline />
 
-              <RouterProvider router={Routes} />
+              <AuthProvider>
+                <RouterProvider router={Routes} />
+              </AuthProvider>
             </ConfirmProvider>
           </ThemeContextProvider>
         </MenuContextProvider>

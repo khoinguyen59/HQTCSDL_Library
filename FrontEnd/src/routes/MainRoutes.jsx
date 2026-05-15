@@ -1,5 +1,6 @@
-﻿import { lazy } from "react";
+import { lazy } from "react";
 import Loadable from "./../ui-component/Loadable";
+import ProtectedRoute from "./ProtectedRoute";
 
 const Structure = Loadable(lazy(() => import("../layout/Structure.jsx")));
 const HomePage = Loadable(lazy(() => import("./../pages/Home/Home")));
@@ -22,11 +23,17 @@ const MainRoutes = {
     },
     {
       path: "/hqtcsdl",
-      element: <HQTCDashboard />,
-    },
-    {
-      path: "/hqtcsdl/actions",
-      element: <HQTCActions />,
+      element: <ProtectedRoute />,
+      children: [
+        {
+          path: "",
+          element: <HQTCDashboard />,
+        },
+        {
+          path: "actions",
+          element: <HQTCActions />,
+        },
+      ],
     },
   ],
 };

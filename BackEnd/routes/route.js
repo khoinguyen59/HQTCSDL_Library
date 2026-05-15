@@ -1,6 +1,8 @@
-﻿import bodyParser from 'body-parser';
+import bodyParser from 'body-parser';
 import Express from 'express';
 import { verifyAdminToken, verifyEmpAdmToken, verifyEmployeeToken, verifyGeneralToken, verifyUserToken } from '../authentication/auth.js';
+import { login } from '../controllers/authController.js';
+import { verifyToken } from '../middleware/authMiddleware.js';
 import {
   deleteApplication,
   deleteApply,
@@ -146,13 +148,15 @@ router.route('/rent-data').get(verifyAdminToken, getRentData);
 router.route('/fine-data').get(verifyAdminToken, getFineData);
 router.route('/logout').get(verifyUserToken, logout);
 
-router.route('/hqtcsdl/dashboard').get(getDashboard);
-router.route('/hqtcsdl/books').get(listBooks);
-router.route('/hqtcsdl/readers').get(listReaders).post(urlencodedParser, createReader);
-router.route('/hqtcsdl/loans').get(listLoans).post(urlencodedParser, createLoan);
-router.route('/hqtcsdl/loan-items').post(urlencodedParser, addLoanItem);
-router.route('/hqtcsdl/return').post(urlencodedParser, returnLoan);
-router.route('/hqtcsdl/import-book').post(urlencodedParser, importBook);
-router.route('/hqtcsdl/liquidate-book').post(urlencodedParser, liquidateBook);
+router.route('/api/auth/login').post(urlencodedParser, login);
+
+router.route('/hqtcsdl/dashboard').get(verifyToken, getDashboard);
+router.route('/hqtcsdl/books').get(verifyToken, listBooks);
+router.route('/hqtcsdl/readers').get(verifyToken, listReaders).post(verifyToken, urlencodedParser, createReader);
+router.route('/hqtcsdl/loans').get(verifyToken, listLoans).post(verifyToken, urlencodedParser, createLoan);
+router.route('/hqtcsdl/loan-items').post(verifyToken, urlencodedParser, addLoanItem);
+router.route('/hqtcsdl/return').post(verifyToken, urlencodedParser, returnLoan);
+router.route('/hqtcsdl/import-book').post(verifyToken, urlencodedParser, importBook);
+router.route('/hqtcsdl/liquidate-book').post(verifyToken, urlencodedParser, liquidateBook);
 
 export default router;
